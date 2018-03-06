@@ -1,4 +1,0 @@
-Elapsed Time: 0.001s
-      Total Length in Bytes: 78447
-      Total Lines: 331
-      Throughput: 78447000 bytes/second

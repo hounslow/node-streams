@@ -1,8 +1,5 @@
-const { Writable, Readable, Duplex } = require('stream');
+const { Writable, Readable, Duplex, Transform } = require('stream');
 const fs = require('fs');
-
-Duplex.Readable = fs.createReadStream('example.txt');
-Duplex.Writable = fs.createWriteStream('objects.txt');
 
 // print process.argv
 // doing this now so that I can work on it in the future
@@ -12,6 +9,7 @@ for(let i = 2; i < process.argv.length; i++){
   j++;
 }
 
+// Object containing all of the information we care about
 let statObject = {
   "start_time": Date.now(),
   "end_time": Date.now(),
@@ -21,23 +19,47 @@ let statObject = {
   "throughput": 0,
 };
 
-Duplex.Readable
-  .on('data', function (chunk) {
-    statObject.start_time = Date.now();
-    statObject.total_length_in_bytes += chunk.length;
-    let dataString = chunk.toString();
-    let split_lines = dataString.split("\n");
-    statObject.total_lines += split_lines.length - 1;
-  })
-  .on('end', function () {
-    statObject.end_time = Date.now();
-    statObject.elapsed_time = (statObject.end_time - statObject.start_time) / 1000;
-    statObject.throughput = statObject.total_length_in_bytes / statObject.elapsed_time;
-    Duplex.Writable.write(
-      `Elapsed Time: ${statObject.elapsed_time}s
-      Total Length in Bytes: ${statObject.total_length_in_bytes}
-      Total Lines: ${statObject.total_lines}
-      Throughput: ${statObject.throughput} bytes/second`);
-  });
+// create source and destination for the duplex
+let source = fs.createReadStream('example.txt');
+let destination = fs.createWriteStream('object.txt');
 
-Duplex.Readable.pipe(process.stdout);
+source.on('data', (chunk) => {
+  statObject.start_time = Date.now();
+  console.log('Reading %d characters of string data', chunk.length);
+  statObject.total_length_in_bytes += chunk.length;
+  let dataString = chunk.toString();
+  let split_lines = dataString.split("\n");
+  statObject.total_lines += split_lines.length - 1;
+});
+
+source.on('end', function () {
+  source.pipe(destination);
+});
+
+destination.on('error', function(error) {
+  console.log("Woops! An error occurred:", error);
+})
+
+destination.on('pipe', (src) => {
+  statObject.end_time = Date.now();
+  statObject.elapsed_time = (statObject.end_time - statObject.start_time) / 1000;
+  statObject.throughput = statObject.total_length_in_bytes / statObject.elapsed_time;
+  destination.write(`{
+    "elapsed_time": ${statObject.elapsed_time},
+    "total_length_in_bytes": ${statObject.total_length_in_bytes},
+    "total_lines": ${statObject.total_lines},
+    "throughput": ${statObject.throughput}}`
+  );
+  destination.end();
+});
+
+destination.on('finish', () => {
+  console.log('All writes are now complete.');
+});
+
+let objectReader = new Readable({
+  objectMode: true,
+  read(){
+
+  }
+})
