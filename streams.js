@@ -8,11 +8,7 @@ for(let i = 2; i < process.argv.length; i++){
   j++;
 }
 let sourcePath = inputs[0] || 'example.txt';
-let destinationPath = inputs[2] || 'logfile.txt';
-
-if (inputs[1] !== '|'){
-  console.log("You forgot to include the pipe symbol!");
-}
+let destinationPath = inputs[1] || 'logfile.txt';
 
 // create the source file
 let source = fs.createReadStream(sourcePath);
@@ -29,15 +25,15 @@ let statObject = {
   "throughput": 0,
 };
 
+
 const objectTransform = new Transform({
   readableObjectMode: true,
   transform(chunk, encoding, error) {
     let diff = process.hrtime(statObject.startTime);
+    statObject.timeInMilliSeconds = (diff[0] *  1000) + (diff[1] / 1000000);
     statObject.currentByteCount = chunk.length;
     statObject.totalBytes += chunk.length;
-    statObject.timeInMilliSeconds = (diff[0] *  1000) + (diff[1] / 1000000);
     statObject.elapsedTime = statObject.timeInMilliSeconds;
-
     let split_lines = chunk.toString().split("\n");
     statObject.totalLines += split_lines.length - 1;
     this.push(statObject);
@@ -49,13 +45,18 @@ const writer = new Writable({
   objectMode: true,
   write(chunk, encoding, error) {
     statObject.throughput = statObject.currentByteCount / statObject.timeInMilliSeconds;
-    console.log(`total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds`);
+    console.log(`total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, current throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds`);
     error();
   },
 });
 
+writer.on('pipe', () => {
+  console.log(`Analysing file ${sourcePath}`);
+})
+
 writer.on('finish', () => {
-  destination.write(`total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds\n`)
+  destination.write(`filename: ${sourcePath}, total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds\n`);
+  console.log('Finished.')
 })
 
 source.pipe(objectTransform).pipe(writer);

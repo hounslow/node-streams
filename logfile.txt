@@ -1,3 +1,8 @@
-total bytes read: 162582 bytes, total lines: 686, throughput: 8253.94164350621 bytes/millisecond, total elapsed time: 3.81757 milliseconds
-total bytes read: 162582 bytes, total lines: 686, throughput: 8312.751512836356 bytes/millisecond, total elapsed time: 3.790562 milliseconds
-total bytes read: 162582 bytes, total lines: 686, throughput: 10140.649619476228 bytes/millisecond, total elapsed time: 3.107296 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 7725.620102990289 bytes/millisecond, total elapsed time: 4.078637 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 1709990.7744071202 bytes/millisecond, total elapsed time: 0.046465 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 7266.004002182338 bytes/millisecond, total elapsed time: 3.855688 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 1310350.563479852 bytes/millisecond, total elapsed time: 0.043163 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 1652853.5459504826 bytes/millisecond, total elapsed time: 0.04774 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 7225.836159496746 bytes/millisecond, total elapsed time: 4.032363 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 7537.648172437278 bytes/millisecond, total elapsed time: 3.865688 milliseconds
+filename: example.txt, total bytes read: 162582 bytes, total lines: 686, throughput: 7785.119821913222 bytes/millisecond, total elapsed time: 4.047465 milliseconds
