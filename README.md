@@ -6,4 +6,4 @@ The goal of this project is to learn about how streams work.
 ## How to run the file:
 1. `git clone` this repo
 2. `npm install` to install dependencies
-3. `node stream.js textfile.txt logfile.txt` where `textfile.txt` refers to the file that is to be read, and `logfile.txt` the file you want to write the statistics to
+3. Run `node stream.js textfile.txt logfile.txt` in your terminal, where `textfile.txt` refers to the file that is to be read, and `logfile.txt` the file you want to write the statistics to
