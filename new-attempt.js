@@ -1,15 +1,24 @@
 const { Writable, Transform, Readable } = require('stream');
 const fs = require('fs');
 
+let j = 1;
+for(let i = 2; i < process.argv.length; i++){
+  console.log(`${j}: ${process.argv[i]}`);
+  j++;
+}
+
+let sourcePath = 'example.txt'
+
 // create the source file
-let source = fs.createReadStream('example.txt');
+let source = fs.createReadStream(sourcePath);
 
 // Object containing all of the information we care about
 let statObject = {
-  "startTime": Date.now(),
-  "endTime": Date.now(),
+  "startTime": process.hrtime(),
+  "timeInSeconds": 0,
   "elapsedTime": 0,
-  "totalLengthInBytes": 0,
+  "totalBytes": 0,
+  "currentByteCount": 0,
   "totalLines": 0,
   "throughput": 0,
 };
@@ -17,12 +26,13 @@ let statObject = {
 const objectTransform = new Transform({
   readableObjectMode: true,
   transform(chunk, encoding, error) {
-    console.log('Reading %d characters of string data', chunk.length);
-    statObject.endTime = Date.now();
-    statObject.totalLengthInBytes += chunk.length;
-    statObject.elapsedTime += (statObject.endTime - statObject.startTime) / 1000;
-    let dataString = chunk.toString();
-    let split_lines = dataString.split("\n");
+    let diff = process.hrtime(statObject.startTime);
+    statObject.currentByteCount = chunk.length;
+    statObject.totalBytes += chunk.length;
+    statObject.timeInSeconds = (diff[0] *  1000) + (diff[1] / 1000000);
+    statObject.elapsedTime = statObject.timeInSeconds;
+
+    let split_lines = chunk.toString().split("\n");
     statObject.totalLines += split_lines.length - 1;
     this.push(statObject);
     error();
@@ -31,10 +41,10 @@ const objectTransform = new Transform({
 
 const writer = new Writable({
   objectMode: true,
-  write(chunk, encoding, callback) {
-    statObject.throughput = statObject.totalLengthInBytes / statObject.elapsedTime;
-    console.log(`Total read lines: ${statObject.totalLengthInBytes}, throughput: ${statObject.throughput}, total elapsed time: ${statObject.elapsedTime}`);
-    callback();
+  write(chunk, encoding, error) {
+    statObject.throughput = statObject.currentByteCount / statObject.timeInSeconds;
+    console.log(`total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds`);
+    error();
   },
 })
 
