@@ -1,4 +1,0 @@
-{
-    "elapsed_time": 0.001,
-    "total_length_in_bytes": 156894,
-    "total_lines": 662}

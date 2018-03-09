@@ -1,16 +1,22 @@
 const { Writable, Transform, Readable } = require('stream');
 const fs = require('fs');
 
-let j = 1;
+let j = 0;
+let inputs = [];
 for(let i = 2; i < process.argv.length; i++){
-  console.log(`${j}: ${process.argv[i]}`);
+  inputs[j] = process.argv[i];
   j++;
 }
+let sourcePath = inputs[0] || 'example.txt';
+let destinationPath = inputs[2] || 'logfile.txt';
 
-let sourcePath = 'example.txt'
+if (inputs[1] !== '|'){
+  console.log("You forgot to include the pipe symbol!");
+}
 
 // create the source file
 let source = fs.createReadStream(sourcePath);
+let destination = fs.createWriteStream(destinationPath, {flags: 'a'});
 
 // Object containing all of the information we care about
 let statObject = {
@@ -29,8 +35,8 @@ const objectTransform = new Transform({
     let diff = process.hrtime(statObject.startTime);
     statObject.currentByteCount = chunk.length;
     statObject.totalBytes += chunk.length;
-    statObject.timeInSeconds = (diff[0] *  1000) + (diff[1] / 1000000);
-    statObject.elapsedTime = statObject.timeInSeconds;
+    statObject.timeInMilliSeconds = (diff[0] *  1000) + (diff[1] / 1000000);
+    statObject.elapsedTime = statObject.timeInMilliSeconds;
 
     let split_lines = chunk.toString().split("\n");
     statObject.totalLines += split_lines.length - 1;
@@ -42,10 +48,16 @@ const objectTransform = new Transform({
 const writer = new Writable({
   objectMode: true,
   write(chunk, encoding, error) {
-    statObject.throughput = statObject.currentByteCount / statObject.timeInSeconds;
+    statObject.throughput = statObject.currentByteCount / statObject.timeInMilliSeconds;
     console.log(`total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds`);
     error();
   },
+});
+
+writer.on('finish', () => {
+  destination.write(`total bytes read: ${statObject.totalBytes} bytes, total lines: ${statObject.totalLines}, throughput: ${statObject.throughput} bytes/millisecond, total elapsed time: ${statObject.elapsedTime} milliseconds\n`)
 })
 
 source.pipe(objectTransform).pipe(writer);
+
+var exports = module.exports = {writer, objectTransform};

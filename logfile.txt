@@ -1,0 +1,3 @@
+total bytes read: 162582 bytes, total lines: 686, throughput: 8253.94164350621 bytes/millisecond, total elapsed time: 3.81757 milliseconds
+total bytes read: 162582 bytes, total lines: 686, throughput: 8312.751512836356 bytes/millisecond, total elapsed time: 3.790562 milliseconds
+total bytes read: 162582 bytes, total lines: 686, throughput: 10140.649619476228 bytes/millisecond, total elapsed time: 3.107296 milliseconds
